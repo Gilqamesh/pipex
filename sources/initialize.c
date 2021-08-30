@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 15:50:33 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/30 11:21:37 by edavid           ###   ########.fr       */
+/*   Updated: 2021/08/30 19:39:54 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,17 +71,19 @@ t_pipex *mystruct)
 	if (!ft_strcmp(argv[1], "here_doc"))
 		init_hereDoc(mystruct, argv);
 	mystruct->commands = ft_lstmallocwrapper(&mystruct->alloced_lst,
-			(mystruct->nOfCmds + 1) * sizeof(*mystruct->commands), false);
+			mystruct->nOfCmds * sizeof(*mystruct->commands), false);
 	if (mystruct->commands == NULL)
 		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
 			file %s\n", __LINE__, __FILE__);
 	initialize_Cmds(mystruct, argv, envp);
-	mystruct->commands[mystruct->nOfCmds] = NULL;
 	mystruct->pipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->pipes), false);
+	if (mystruct->pipes == NULL)
+		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
+			file %s\n", __LINE__, __FILE__);
 	mystruct->openPipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->openPipes), true);
-	if (mystruct->pipes == NULL)
+	if (mystruct->openPipes == NULL)
 		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
 			file %s\n", __LINE__, __FILE__);
 }
