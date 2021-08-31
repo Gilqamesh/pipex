@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:50:28 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/30 19:33:35 by edavid           ###   ########.fr       */
+/*   Updated: 2021/08/31 16:27:05 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,14 +121,14 @@ void	closePreviousPipes(t_pipex *mystruct, int upToPipeNum)
 	i = -1;
 	while (++i < upToPipeNum)
 	{
-		if (mystruct->openPipes[i][0])
+		if (mystruct->openPipes && mystruct->openPipes[i][0])
 		{
 			mystruct->openPipes[i][0] = false;
 			if (close(mystruct->pipes[i][0]) == -1)
 				error_handler(mystruct, PIPEX_EFCLOSE, "Pipe failed to \
 					close() at line %d in file %s\n", __LINE__, __FILE__);
 		}
-		if (mystruct->openPipes[i][1])
+		if (mystruct->openPipes && mystruct->openPipes[i][1])
 		{
 			mystruct->openPipes[i][1] = false;
 			if (close(mystruct->pipes[i][1]) == -1)

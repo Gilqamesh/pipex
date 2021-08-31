@@ -1,0 +1,17 @@
+	if (mystruct->openPipes[curPipeNum][0])$$
+		if (close(mystruct->pipes[curPipeNum][0]) == -1)$$
+	if (dup2(mystruct->pipes[curPipeNum - 1][0], STDIN_FILENO) == -1)$$
+	if (dup2(mystruct->pipes[curPipeNum][1], STDOUT_FILENO) == -1)$$
+	if (mystruct->openPipes[curPipeNum][1])$$
+		if (close(mystruct->pipes[curPipeNum][1]) == -1)$$
+	if (execve(mystruct->commands[curPipeNum][0],$$
+	if (close(mystruct->pipes[curPipeNum - 1][1]) == -1)$$
+	if (pipe(mystruct->pipes[curPipeNum]) == -1)$$
+	if (pid == -1)$$
+	if (pid == 0)$$
+	if (pid == -1)$$
+	if (WIFEXITED(wstatus))$$
+		if (statusCode)$$
+	if (pipe(mystruct.pipes[0]) == -1)$$
+	if (pid == -1)$$
+	if (pid == 0)$$

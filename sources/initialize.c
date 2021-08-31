@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 15:50:33 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/30 19:39:54 by edavid           ###   ########.fr       */
+/*   Updated: 2021/08/31 16:37:51 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,13 @@ t_pipex *mystruct)
 	if (!ft_strcmp(argv[1], "here_doc"))
 		init_hereDoc(mystruct, argv);
 	mystruct->commands = ft_lstmallocwrapper(&mystruct->alloced_lst,
-			mystruct->nOfCmds * sizeof(*mystruct->commands), false);
+			mystruct->nOfCmds * sizeof(*mystruct->commands), true);
 	if (mystruct->commands == NULL)
 		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
 			file %s\n", __LINE__, __FILE__);
+	PRINT_HERE();
 	initialize_Cmds(mystruct, argv, envp);
+	PRINT_HERE();
 	mystruct->pipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->pipes), false);
 	if (mystruct->pipes == NULL)
@@ -133,8 +135,14 @@ void	cmd_path(t_pipex *mystruct, char **cmd, char *envp[])
 		error_handler(mystruct, PIPEX_ERR, "Something went wrong with\
 				ft_split at line %d in file %s\n", __LINE__, __FILE__);
 	cur_path = get_cur_path(mystruct, paths, cmd);
+	PRINT_HERE();
 	if (cur_path == NULL)
+	{
+		ft_destroy_str_arr(&paths);
+		PRINT_HERE();
 		error_handler(mystruct, PIPEX_ECMD, "No path found for %s\n", *cmd);
+	}
+	PRINT_HERE();
 	ft_destroy_str_arr(&paths);
 	free(*cmd);
 	*cmd = cur_path;

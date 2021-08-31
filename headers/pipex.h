@@ -6,13 +6,13 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/19 16:24:08 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/27 18:26:43 by edavid           ###   ########.fr       */
+/*   Updated: 2021/08/31 16:26:55 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_H
 # define PIPEX_H
-
+#define PRINT_HERE() (ft_printf("LINE %d FILE %s\n", __LINE__, __FILE__))
 # include "../mylib/mylib.h"
 # include <stdio.h>
 # include <unistd.h>
