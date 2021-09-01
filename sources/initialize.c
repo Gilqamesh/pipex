@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 15:50:33 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/31 16:37:51 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/01 14:41:02 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,15 @@ static void	initialize_Cmds(t_pipex *mystruct, char *argv[], char *envp[])
 /*
 ** Initializes values related to here_doc in 'mystruct'
 */
-static void	init_hereDoc(t_pipex *mystruct, char *argv[])
+static void	init_hereDoc(t_pipex *mystruct, int argc, char **argv)
 {
 	mystruct->isHereDoc = true;
 	mystruct->nOfCmds--;
+	mystruct->file[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND,
+			0777);
+	if (mystruct->file[1] == -1)
+		error_handler(mystruct, PIPEX_EFOPEN, "Could not open file %s\n",
+			argv[argc - 1]);
 	if (mystruct->nOfCmds < 1)
 		error_handler(mystruct, PIPEX_EUSAGE,
 			"Usage: ./pipex here_doc LIMITER cmd [commands ...] outfile\n");
@@ -69,15 +74,15 @@ t_pipex *mystruct)
 		error_handler(mystruct, PIPEX_EUSAGE,
 			"Usage: ./pipex infile cmd1 [additional commands ...] outfile\n");
 	if (!ft_strcmp(argv[1], "here_doc"))
-		init_hereDoc(mystruct, argv);
+		init_hereDoc(mystruct, argc, argv);
+	else
+		initOutFile(mystruct, argc, argv);
 	mystruct->commands = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->commands), true);
 	if (mystruct->commands == NULL)
 		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
 			file %s\n", __LINE__, __FILE__);
-	PRINT_HERE();
 	initialize_Cmds(mystruct, argv, envp);
-	PRINT_HERE();
 	mystruct->pipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->pipes), false);
 	if (mystruct->pipes == NULL)
@@ -135,14 +140,11 @@ void	cmd_path(t_pipex *mystruct, char **cmd, char *envp[])
 		error_handler(mystruct, PIPEX_ERR, "Something went wrong with\
 				ft_split at line %d in file %s\n", __LINE__, __FILE__);
 	cur_path = get_cur_path(mystruct, paths, cmd);
-	PRINT_HERE();
 	if (cur_path == NULL)
 	{
 		ft_destroy_str_arr(&paths);
-		PRINT_HERE();
 		error_handler(mystruct, PIPEX_ECMD, "No path found for %s\n", *cmd);
 	}
-	PRINT_HERE();
 	ft_destroy_str_arr(&paths);
 	free(*cmd);
 	*cmd = cur_path;

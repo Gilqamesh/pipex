@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:42:42 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/31 16:27:38 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/01 14:52:41 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,16 +89,14 @@ void	wait_childProcess(t_pipex *mystruct)
 		error_handler(mystruct, PIPEX_EEXIT, "Child process of PID %d has \
 			not exited properly\n", pid);
 }
-#include <stdlib.h>
+
 int	main(int argc, char *argv[], char *envp[])
 {
 	pid_t	pid;
 	int		i;
 	t_pipex	mystruct;
 
-	PRINT_HERE();
 	initialize_mystruct(argc, argv, envp, &mystruct);
-	PRINT_HERE();
 	if (pipe(mystruct.pipes[0]) == -1)
 		error_handler(&mystruct, PIPEX_EPIPE, "pipe() failed at line %d in \
 			file %s\n", __LINE__, __FILE__);
@@ -110,7 +108,6 @@ int	main(int argc, char *argv[], char *envp[])
 			file %s\n", __LINE__, __FILE__);
 	if (pid == 0)
 		handle_inputFile_firstCmd(&mystruct, argv, envp);
-	PRINT_HERE();
 	i = 0;
 	while (++i < mystruct.nOfCmds)
 		createPipe_betweenTwoCmds(&mystruct, i, envp);

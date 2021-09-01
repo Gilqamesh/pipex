@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:50:28 by edavid            #+#    #+#             */
-/*   Updated: 2021/08/31 16:27:05 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/01 14:38:09 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,11 +93,6 @@ void	handle_lastCmd_outputFile(t_pipex *mystruct, int argc, char *argv[])
 			error_handler(mystruct, PIPEX_EFCLOSE, "close() failed at line %d \
 				in file %s\n", __LINE__, __FILE__);
 	}
-	mystruct->file[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC,
-			0777);
-	if (mystruct->file[1] == -1)
-		error_handler(mystruct, PIPEX_EFOPEN, "Could not open file %s\n",
-			argv[argc - 1]);
 	transfer_data(mystruct);
 	if (close(mystruct->file[1]) == -1)
 		error_handler(mystruct, PIPEX_EFCLOSE, "close() failed at line %d \
