@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 15:50:33 by edavid            #+#    #+#             */
-/*   Updated: 2021/09/02 13:19:51 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/04 17:34:01 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,7 @@ static void	initialize_Cmds(t_pipex *mystruct, char *argv[], char *envp[])
 	{
 		mystruct->commands[i] = ft_split(argv[i + firstArgIndex], ' ');
 		if (mystruct->commands[i] == NULL)
-			error_handler(mystruct, PIPEX_ERR, "Something went wrong with \
-				ft_split at line %d in file %s\n", __LINE__, __FILE__);
+			error_handler(mystruct, PIPEX_ERR, "ft_split() failed\n");
 		if (mystruct->commands[i][0] == NULL)
 			error_handler(mystruct, PIPEX_EUSAGE, "Empty command\n");
 		cmd_path(mystruct, &mystruct->commands[i][0], envp);
@@ -50,15 +49,13 @@ static void	init_hereDoc(t_pipex *mystruct, int argc, char **argv)
 	mystruct->file[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND,
 			0777);
 	if (mystruct->file[1] == -1)
-		error_handler(mystruct, PIPEX_EFOPEN, "Could not open file %s\n",
-			argv[argc - 1]);
+		error_handler(mystruct, PIPEX_EFOPEN, "Could not open outfile\n");
 	if (mystruct->nOfCmds < 1)
 		error_handler(mystruct, PIPEX_EUSAGE,
 			"Usage: ./pipex here_doc LIMITER cmd [commands ...] outfile\n");
 	mystruct->delimiter = ft_strdup(argv[2]);
 	if (mystruct->delimiter == NULL)
-		error_handler(mystruct, PIPEX_ERR, "Malloc failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
+		error_handler(mystruct, PIPEX_ERR, "Malloc failed\n");
 	ft_lstadd_front(&mystruct->alloced_lst, ft_lstnew(mystruct->delimiter));
 }
 
@@ -80,19 +77,16 @@ t_pipex *mystruct)
 	mystruct->commands = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->commands), true);
 	if (mystruct->commands == NULL)
-		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
+		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed\n");
 	initialize_Cmds(mystruct, argv, envp);
 	mystruct->pipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->pipes), false);
 	if (mystruct->pipes == NULL)
-		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
+		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed\n");
 	mystruct->openPipes = ft_lstmallocwrapper(&mystruct->alloced_lst,
 			mystruct->nOfCmds * sizeof(*mystruct->openPipes), true);
 	if (mystruct->openPipes == NULL)
-		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
+		error_handler(mystruct, PIPEX_EMALLOC, "Malloc failed\n");
 }
 
 /*
@@ -110,8 +104,7 @@ static char	*get_cur_path(t_pipex *mystruct, char **paths, char **cmd)
 	{
 		cur_path = ft_strjoin_free(ft_strdup(paths[i]), ft_strjoin("/", *cmd));
 		if (cur_path == NULL)
-			error_handler(mystruct, PIPEX_ERR, "Something went wrong with\
-				ft_strjoin_free at line %d in file %s\n", __LINE__, __FILE__);
+			error_handler(mystruct, PIPEX_ERR, "ft_strjoin_free() failed\n");
 		if (!access(cur_path, F_OK))
 			break ;
 		free(cur_path);
@@ -137,14 +130,10 @@ void	cmd_path(t_pipex *mystruct, char **cmd, char *envp[])
 		;
 	paths = ft_split(envp[i] + 5, ':');
 	if (paths == NULL)
-		error_handler(mystruct, PIPEX_ERR, "Something went wrong with\
-				ft_split at line %d in file %s\n", __LINE__, __FILE__);
+		error_handler(mystruct, PIPEX_ERR, "ft_split() failed\n");
 	cur_path = get_cur_path(mystruct, paths, cmd);
 	if (cur_path == NULL)
-	{
-		ft_destroy_str_arr(&paths);
-		error_handler(mystruct, PIPEX_ECMD, "No path found for %s\n", *cmd);
-	}
+		cur_path = ft_strdup("");
 	ft_destroy_str_arr(&paths);
 	free(*cmd);
 	*cmd = cur_path;

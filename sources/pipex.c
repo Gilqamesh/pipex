@@ -6,39 +6,36 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:42:42 by edavid            #+#    #+#             */
-/*   Updated: 2021/09/01 14:52:41 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/04 19:18:10 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/pipex.h"
 
+static void	sendEOFtoInput(t_pipex *mystruct)
+{
+	if (pipe(mystruct->tmpFd) == -1)
+		error_handler(mystruct, PIPEX_EPIPE, "pipe() failed\n");
+	mydup2(mystruct, mystruct->tmpFd[0], STDIN_FILENO);
+	close(mystruct->tmpFd[0]);
+	close(mystruct->tmpFd[1]);
+}
+
 static void	handleChildProcess(t_pipex *mystruct, int curPipeNum, char *envp[])
 {
-	if (mystruct->openPipes[curPipeNum][0])
+	closePipe(mystruct, curPipeNum, 0);
+	if (mystruct->openPipes[curPipeNum - 1][0])
 	{
-		mystruct->openPipes[curPipeNum][0] = false;
-		if (close(mystruct->pipes[curPipeNum][0]) == -1)
-			error_handler(mystruct, PIPEX_EFCLOSE, "Pipe failed to \
-				close() at line %d in file %s\n", __LINE__, __FILE__);
+		mydup2(mystruct, mystruct->pipes[curPipeNum - 1][0], STDIN_FILENO);
+		closePipe(mystruct, curPipeNum - 1, 0);
 	}
-	if (dup2(mystruct->pipes[curPipeNum - 1][0], STDIN_FILENO) == -1)
-		error_handler(mystruct, PIPEX_EDUP2, "dup2 failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
-	closePreviousPipes(mystruct, curPipeNum);
-	if (dup2(mystruct->pipes[curPipeNum][1], STDOUT_FILENO) == -1)
-		error_handler(mystruct, PIPEX_EDUP2, "dup2 failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
-	if (mystruct->openPipes[curPipeNum][1])
-	{
-		mystruct->openPipes[curPipeNum][1] = false;
-		if (close(mystruct->pipes[curPipeNum][1]) == -1)
-			error_handler(mystruct, PIPEX_EFCLOSE, "Pipe failed to \
-				close() at line %d in file %s\n", __LINE__, __FILE__);
-	}
+	else
+		sendEOFtoInput(mystruct);
+	mydup2(mystruct, mystruct->pipes[curPipeNum][1], STDOUT_FILENO);
+	closePipe(mystruct, curPipeNum, 1);
 	if (execve(mystruct->commands[curPipeNum][0],
 		mystruct->commands[curPipeNum], envp) == -1)
-		error_handler(mystruct, PIPEX_ECMD, "Unable to execute %s\n",
-			mystruct->commands[curPipeNum][0]);
+		error_handler(mystruct, PIPEX_EEXIT, "command not found\n");
 }
 
 /*
@@ -49,45 +46,39 @@ static void	createPipe_betweenTwoCmds(t_pipex *mystruct, int curPipeNum,
 char *envp[])
 {
 	pid_t	pid;
+	int		wstatus;
 
-	mystruct->openPipes[curPipeNum - 1][1] = false;
-	if (close(mystruct->pipes[curPipeNum - 1][1]) == -1)
-		error_handler(mystruct, PIPEX_EFCLOSE, "close() failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
-	wait_childProcess(mystruct);
-	if (pipe(mystruct->pipes[curPipeNum]) == -1)
-		error_handler(mystruct, PIPEX_EPIPE, "pipe() failed at line %d in file \
-			%s\n", __LINE__, __FILE__);
-	mystruct->openPipes[curPipeNum][0] = true;
-	mystruct->openPipes[curPipeNum][1] = true;
-	pid = fork();
-	if (pid == -1)
-		error_handler(mystruct, PIPEX_EFORK, "fork() failed at line %d in file \
-			%s\n", __LINE__, __FILE__);
+	closePipe(mystruct, curPipeNum - 1, 1);
+	wstatus = wait_childProcess(mystruct);
+	if (wstatus)
+		closePipe(mystruct, curPipeNum - 1, 0);
+	openPipe(mystruct, curPipeNum);
+	pid = myfork(mystruct);
 	if (pid == 0)
 		handleChildProcess(mystruct, curPipeNum, envp);
+	closePipe(mystruct, curPipeNum - 1, 0);
+	closePipe(mystruct, curPipeNum, 1);
 }
 
-void	wait_childProcess(t_pipex *mystruct)
+int	wait_childProcess(t_pipex *mystruct)
 {
 	pid_t	pid;
 	int		statusCode;
 	int		wstatus;
 
+	statusCode = 0;
 	pid = wait(&wstatus);
 	if (pid == -1)
-		error_handler(mystruct, PIPEX_ERR, "wait() failed at line %d in file \
-			%s\n", __LINE__, __FILE__);
+		return (PIPEX_ERR);
 	if (WIFEXITED(wstatus))
 	{
 		statusCode = WEXITSTATUS(wstatus);
 		if (statusCode)
-			error_handler(mystruct, PIPEX_ESTATUS, "Child process of PID %d\
-					has executed with a status code of %d\n", pid, statusCode);
+			return (PIPEX_ESTATUS);
 	}
 	else
-		error_handler(mystruct, PIPEX_EEXIT, "Child process of PID %d has \
-			not exited properly\n", pid);
+		return (PIPEX_EEXIT);
+	return (statusCode);
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -95,24 +86,17 @@ int	main(int argc, char *argv[], char *envp[])
 	pid_t	pid;
 	int		i;
 	t_pipex	mystruct;
+	int		statusCode;
 
 	initialize_mystruct(argc, argv, envp, &mystruct);
-	if (pipe(mystruct.pipes[0]) == -1)
-		error_handler(&mystruct, PIPEX_EPIPE, "pipe() failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
-	mystruct.openPipes[0][0] = true;
-	mystruct.openPipes[0][1] = true;
-	pid = fork();
-	if (pid == -1)
-		error_handler(&mystruct, PIPEX_EFORK, "fork() failed at line %d in \
-			file %s\n", __LINE__, __FILE__);
+	openPipe(&mystruct, 0);
+	pid = myfork(&mystruct);
 	if (pid == 0)
 		handle_inputFile_firstCmd(&mystruct, argv, envp);
 	i = 0;
 	while (++i < mystruct.nOfCmds)
 		createPipe_betweenTwoCmds(&mystruct, i, envp);
-	closePreviousPipes(&mystruct, i - 1);
-	handle_lastCmd_outputFile(&mystruct, argc, argv);
+	statusCode = handle_lastCmd_outputFile(&mystruct, argc, argv);
 	destroy_mystruct(&mystruct);
-	return (0);
+	return (statusCode);
 }

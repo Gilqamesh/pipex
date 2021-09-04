@@ -1,14 +1,14 @@
 CC = gcc
-CFLAGS =
+CFLAGS = -g
 SDIR = sources
 ODIR = objects
-SRC = pipex.c fork.c error.c initialize.c here_doc.c
+SRC = pipex.c fork.c error.c initialize.c here_doc.c myfuncs.c
 NAME = pipex
 MYLIB = mylib/libmylib.a
 
-$(NAME): $(SRC:.c=.o) $(MYLIB)
+$(NAME): $(foreach file,$(SRC:.c=.o),$(ODIR)/$(file)) $(MYLIB)
 	$(CC) -o $@ $(foreach src,$(SRC:.c=.o),$(ODIR)/$(src)) $(MYLIB)
-%.o: $(SDIR)/%.c
+$(ODIR)/%.o: $(SDIR)/%.c
 	cd $(ODIR) && $(CC) $(CFLAGS) -c ../$<
 $(MYLIB):
 	$(MAKE) --directory=mylib
