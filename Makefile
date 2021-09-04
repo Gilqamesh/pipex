@@ -7,6 +7,7 @@ NAME = pipex
 MYLIB = mylib/libmylib.a
 
 $(NAME): $(foreach file,$(SRC:.c=.o),$(ODIR)/$(file)) $(MYLIB)
+	-mkdir objects
 	$(CC) -o $@ $(foreach src,$(SRC:.c=.o),$(ODIR)/$(src)) $(MYLIB)
 $(ODIR)/%.o: $(SDIR)/%.c
 	cd $(ODIR) && $(CC) $(CFLAGS) -c ../$<
