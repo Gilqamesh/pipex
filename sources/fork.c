@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:50:28 by edavid            #+#    #+#             */
-/*   Updated: 2021/09/04 17:54:42 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/05 19:06:53 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,12 @@ static void	transfer_data(t_pipex *mystruct)
 		error_handler(mystruct, PIPEX_EFCLOSE, "close() failed\n");
 }
 
-int	handle_lastCmd_outputFile(t_pipex *mystruct, int argc, char *argv[])
+int	handle_lastCmd_outputFile(t_pipex *mystruct)
 {
 	int	statusCode;
 
 	closePipe(mystruct, mystruct->nOfCmds - 1, 1);
-	statusCode = wait_childProcess(mystruct);
+	statusCode = wait_childProcess();
 	mydup2(mystruct, mystruct->pipes[mystruct->nOfCmds - 1][0], STDIN_FILENO);
 	closePipe(mystruct, mystruct->nOfCmds - 1, 0);
 	transfer_data(mystruct);

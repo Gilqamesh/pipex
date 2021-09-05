@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/23 14:42:42 by edavid            #+#    #+#             */
-/*   Updated: 2021/09/04 19:18:10 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/05 19:07:07 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ char *envp[])
 	int		wstatus;
 
 	closePipe(mystruct, curPipeNum - 1, 1);
-	wstatus = wait_childProcess(mystruct);
+	wstatus = wait_childProcess();
 	if (wstatus)
 		closePipe(mystruct, curPipeNum - 1, 0);
 	openPipe(mystruct, curPipeNum);
@@ -60,7 +60,7 @@ char *envp[])
 	closePipe(mystruct, curPipeNum, 1);
 }
 
-int	wait_childProcess(t_pipex *mystruct)
+int	wait_childProcess(void)
 {
 	pid_t	pid;
 	int		statusCode;
@@ -96,7 +96,7 @@ int	main(int argc, char *argv[], char *envp[])
 	i = 0;
 	while (++i < mystruct.nOfCmds)
 		createPipe_betweenTwoCmds(&mystruct, i, envp);
-	statusCode = handle_lastCmd_outputFile(&mystruct, argc, argv);
+	statusCode = handle_lastCmd_outputFile(&mystruct);
 	destroy_mystruct(&mystruct);
 	return (statusCode);
 }

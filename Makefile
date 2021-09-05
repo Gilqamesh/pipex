@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g
+CFLAGS = -Wall -Wextra -Werror
 SDIR = sources
 ODIR = objects
 SRC = pipex.c fork.c error.c initialize.c here_doc.c myfuncs.c

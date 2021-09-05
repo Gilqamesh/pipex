@@ -6,7 +6,7 @@
 /*   By: edavid <edavid@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/19 16:24:08 by edavid            #+#    #+#             */
-/*   Updated: 2021/09/04 19:20:09 by edavid           ###   ########.fr       */
+/*   Updated: 2021/09/05 19:06:45 by edavid           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,14 @@ typedef struct s_pipex
 void	error_handler(t_pipex *mystruct, int errcode, char *message);
 void	handle_inputFile_firstCmd(t_pipex *mystruct, char *argv[],
 			char *envp[]);
-int		handle_lastCmd_outputFile(t_pipex *mystruct, int argc, char *argv[]);
+int		handle_lastCmd_outputFile(t_pipex *mystruct);
 void	destroy_mystruct(t_pipex *mystruct);
 void	initialize_mystruct(int argc, char *argv[], char *envp[],
 			t_pipex *mystruct);
 void	cmd_path(t_pipex *mystruct, char **cmd, char *envp[]);
 void	closePreviousPipes(t_pipex *mystruct, int upToPipeNum);
 void	read_until_delimiter(t_pipex *mystruct);
-int		wait_childProcess(t_pipex *mystruct);
+int		wait_childProcess(void);
 void	initOutFile(t_pipex *mystruct, int argc, char **argv);
 void	closePipe(t_pipex *mystruct, int pipeNumber, int read_or_write_end);
 void	openPipe(t_pipex *mystruct, int pipeNumber);
